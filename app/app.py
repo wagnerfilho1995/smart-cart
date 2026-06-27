@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from config import settings
+from controller.comparison_controller import comparison_controller
 from health import api_health
 from log_filter import EndpointFilter
 
@@ -27,3 +28,4 @@ app = FastAPI(
 )
 
 app.add_api_route("/health", api_health, name="Health Check", tags=["Health"])
+app.include_router(comparison_controller, prefix="/products", tags=["Products"])
