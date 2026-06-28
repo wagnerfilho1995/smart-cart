@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from config import settings
+from controller.cart_controller import cart_controller
 from controller.comparison_controller import comparison_controller
+from database import close_db_pool, init_db_pool
 from health import api_health
 from log_filter import EndpointFilter
 
@@ -15,7 +17,11 @@ logging.getLogger("uvicorn.access").addFilter(EndpointFilter(excluded_endpoints)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
+    await init_db_pool()
+    try:
+        yield
+    finally:
+        await close_db_pool()
 
 
 app = FastAPI(
@@ -28,4 +34,5 @@ app = FastAPI(
 )
 
 app.add_api_route("/health", api_health, name="Health Check", tags=["Health"])
+app.include_router(cart_controller, prefix="/carts", tags=["Carts"])
 app.include_router(comparison_controller, prefix="/products", tags=["Products"])
